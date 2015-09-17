@@ -1,19 +1,18 @@
 var video = $("#video").get(0);
 var $output = $("#output");
 var canvas = $("#canvas").get(0);
-var gif;
+var fps = 5;
+
 var captureImage = function() {
-
-
-
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     var ctx = canvas.getContext('2d');
 
-
-    gif = new GIF({
+    var gif = new GIF({
         workers: 4,
         quality: 10,
+        background: '#000',
+        transparent: '#000',
         height: canvas.height,
         width: canvas.width,
         workerScript: 'http://localhost:3000/javascripts/gif.worker.js'
@@ -35,16 +34,38 @@ var captureImage = function() {
     video.currentTime = start;
     video.play();
 
+    ctx.drawImage($maskCanvas[0], 0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation="source-in";
+    ctx.save();
+
     var timer = Date.now();
+    var fpsGap = 1/fps * 1000;
+    var bgImage = false;
     var frameCapture = function() {
+        var now = Date.now()
+        var diff = now - timer;
+        if(video.currentTime >= stop) {
+            gif.render();
+            return;
+        }
 
-    }
+        if(diff >= fpsGap) {
 
-    // add a image element
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    gif.addFrame(ctx, {copy: true, delay: 10});
+            if(!bgImage) {
+                $("#output-canvas").get(0).getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            }
 
-    gif.render();
+            // add a image element
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            gif.addFrame(ctx, {copy: true, delay: fpsGap});
+            timer = now;
+            ctx.restore();
+        }
+
+        requestAnimationFrame(frameCapture);
+    };
+
+    frameCapture();
 };
 
 $('#go').click(captureImage);
@@ -77,6 +98,15 @@ video.addEventListener('timeupdate', function() {
 
 video.oncanplaythrough = function() { console.log('start');
     video.oncanplaythrough = null;
+
+    $('.vs').css('width', video.videoWidth);
+    $('.vs').css('height', video.videoHeight);
+
+    $('canvas').each(function(indx,elem) {
+        elem.width = video.videoWidth;
+        elem.height = video.videoHeight;
+    });
+
     start = video.seekable.start(0);
     stop = video.seekable.end(0);
     $('#slider-range').slider({
@@ -138,7 +168,7 @@ function Draw(x, y, isDown) {
     if (isDown) {
         maskCtx.beginPath();
         maskCtx.strokeStyle = 'red';//$('#selColor').val();
-        maskCtx.lineWidth = 15;//$('#selWidth').val();
+        maskCtx.lineWidth = 20;//$('#selWidth').val();
         maskCtx.lineJoin = "round";
         maskCtx.moveTo(lastX, lastY);
         maskCtx.lineTo(x, y);

@@ -9,14 +9,9 @@ a {
 
 video {
   border: 1px solid grey;
-  width: 100%;
 }
 
-#vid-div {
-  width: 500px;
-}
-
-#vid-box {
+#vid-box, #output-div {
   position: relative;
 }
 
@@ -25,12 +20,10 @@ video {
   width: 100%
 }
 
-#mask-canvas {
+#mask-canvas, #output {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
   top:0;
-  width: 100%;
-  height: 100%;
 }

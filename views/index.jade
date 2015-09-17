@@ -4,9 +4,9 @@ block content
     h1 Cinemagraphs
     div(id='vid-div')
         div(id='vid-box')
-            video(id='video')
-                source(src='/Lucy20ONAmazon.mp4')
-            canvas(id='mask-canvas')
+            video.vs(id='video')
+                source(src='/Sequence01.mp4')
+            canvas.vs(id='mask-canvas')
         div(id='progressbar')
         div(id='slider-range')
 
@@ -18,8 +18,11 @@ block content
     br
     br
     br
-    canvas(id='canvas')
-    img(id='output')
+    canvas.vs(id='canvas')
+
+    div(id='output-div')
+        canvas.vs(id='output-canvas')
+        img.vs(id='output')
 
 
     link(rel="stylesheet", href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css")
