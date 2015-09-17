@@ -1,0 +1,21 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+video {
+  border: 1px solid grey;
+  width: 100%;
+}
+
+#vid-div {
+  width: 500px;
+}
+
+#slider-range {
+  width: 100%
+}
