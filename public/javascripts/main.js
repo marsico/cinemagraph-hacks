@@ -1,28 +1,48 @@
 var video = $("#video").get(0);
 var $output = $("#output");
 var canvas = $("#canvas").get(0);
-
+var gif;
 var captureImage = function() {
+
+
+
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    canvas.getContext('2d')
-        .drawImage(video, 0, 0, canvas.width, canvas.height);
+    var ctx = canvas.getContext('2d');
 
-    var gif = new GIF({
-        workers: 0,
+
+    gif = new GIF({
+        workers: 4,
         quality: 10,
-        workerScript: 'http://localhost:3000/javascripts/gif.workers.js'
+        height: canvas.height,
+        width: canvas.width,
+        workerScript: 'http://localhost:3000/javascripts/gif.worker.js'
     });
 
-    // add a image element
-    gif.addFrame(canvas, {copy: true});
+    gif.on('start', function() {
+        console.log('start');
+    });
 
     gif.on('finished', function (blob) {
-        $output.src = URL.createObjectURL(blob);
+        console.log("100%\n\n" + ((blob.size / 1000).toFixed(2)) + "kb");
+        $output.attr('src', URL.createObjectURL(blob));
     });
     gif.on('progress', function (p) {
         console.log("Rendering  frame(s) at q" + gif.options.quality + "... " + (Math.round(p * 100)) + "%");
     });
+
+    video.pause();
+    video.currentTime = start;
+    video.play();
+
+    var timer = Date.now();
+    var frameCapture = function() {
+
+    }
+
+    // add a image element
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    gif.addFrame(ctx, {copy: true, delay: 10});
 
     gif.render();
 };
@@ -79,4 +99,58 @@ video.oncanplaythrough = function() { console.log('start');
 
     video.muted = true;
 };
+
+
+
+
+
+
+/*
+    Mask Drawing
+ */
+var mousePressed = false;
+var lastX, lastY;
+var $maskCanvas = $('#mask-canvas');
+var maskCtx = document.getElementById('mask-canvas').getContext('2d');
+document.getElementById('mask-canvas').height = $maskCanvas.height();
+document.getElementById('mask-canvas').width = $maskCanvas.width();
+
+$maskCanvas.mousedown(function (e) {
+    mousePressed = true;
+    Draw(e.pageX - $(this).offset().left, e.pageY - $(this).offset().top, false);
+});
+
+$maskCanvas.mousemove(function (e) {
+    if (mousePressed) {
+        Draw(e.pageX - $(this).offset().left, e.pageY - $(this).offset().top, true);
+    }
+});
+
+$maskCanvas.mouseup(function (e) {
+    mousePressed = false;
+});
+
+$maskCanvas.mouseleave(function (e) {
+    mousePressed = false;
+});
+
+function Draw(x, y, isDown) {
+    if (isDown) {
+        maskCtx.beginPath();
+        maskCtx.strokeStyle = 'red';//$('#selColor').val();
+        maskCtx.lineWidth = 15;//$('#selWidth').val();
+        maskCtx.lineJoin = "round";
+        maskCtx.moveTo(lastX, lastY);
+        maskCtx.lineTo(x, y);
+        maskCtx.closePath();
+        maskCtx.stroke();
+    }
+    lastX = x; lastY = y;
+}
+
+function clearArea() {
+    // Use the identity matrix while clearing the canvas
+    maskCtx.setTransform(1, 0, 0, 1, 0, 0);
+    maskCtx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+}
 

@@ -3,8 +3,10 @@ extends layout
 block content
     h1 Cinemagraphs
     div(id='vid-div')
-        video(id='video')
-            source(src='/Lucy20ONAmazon.mp4')
+        div(id='vid-box')
+            video(id='video')
+                source(src='/Lucy20ONAmazon.mp4')
+            canvas(id='mask-canvas')
         div(id='progressbar')
         div(id='slider-range')
 
